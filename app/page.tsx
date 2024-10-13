@@ -38,7 +38,6 @@ const calculateTimeWithElapsed = (storedTime: any, elapsedSeconds: any) => {
   newTime.days -= Math.floor(elapsedSeconds / 86400) % 365;
   newTime.years -= Math.floor(elapsedSeconds / 31536000);
 
-  // Adjust underflow values
   if (newTime.seconds <= 0) {
     newTime.seconds += 60;
     newTime.minutes -= 1;
@@ -72,10 +71,10 @@ const showLogoOncePerDay = () => {
     const today = new Date().toISOString().split("T")[0];
 
     if (lastLogoDate === today) {
-      return false; // Don't show the logo
+      return false;
     } else {
       localStorage.setItem("logoLastShown", today);
-      return true; // Show the logo
+      return true;
     }
   }
   return false;
@@ -104,11 +103,9 @@ export default function CountdownTimer() {
 
   useEffect(() => {
     if (isLoading) {
-      // Play loading sound
       const audio = new Audio("/static/scream.mp3");
       audio.play();
 
-      // Loading animation lasts for 3 seconds
       const timer = setTimeout(() => {
         setIsLoading(false);
       }, 3000);
@@ -121,7 +118,6 @@ export default function CountdownTimer() {
     if (!isLoading && !showToS) {
       let storedTime = getStoredTime();
       if (!storedTime) {
-        // If no stored time, generate new random time and save it
         const newTime = generateRandomTime();
         storedTime = {
           time: newTime,
@@ -129,7 +125,6 @@ export default function CountdownTimer() {
         };
         setStoredTime(storedTime);
       } else {
-        // Update time with elapsed seconds
         const now = new Date().getTime();
         const lastVisit = new Date(storedTime.lastVisit).getTime();
         const elapsedSeconds = Math.floor((now - lastVisit) / 1000);
@@ -143,13 +138,11 @@ export default function CountdownTimer() {
       }
       setTimeLeft(storedTime.time);
 
-      // Start countdown
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => {
           {/* @ts-ignore*/ }
           let newTime = { ...prevTime };
 
-          // Countdown logic
           if (newTime.seconds > 1) {
             newTime.seconds -= 1;
           } else {
@@ -191,7 +184,6 @@ export default function CountdownTimer() {
     }
   }, [isLoading, showToS]);
 
-  // Accept ToS
   const acceptToS = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("tosAccepted", "true");
@@ -202,7 +194,6 @@ export default function CountdownTimer() {
     setIsLoading(true);
   };
 
-  // Deny ToS
   const denyToS = () => {
     router.back();
   };
@@ -212,12 +203,11 @@ export default function CountdownTimer() {
   };
 
   if (!timeLeft && !isLoading && !showToS) {
-    // Show a loading indicator or nothing
     return null;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
       <AnimatePresence>
         {showToS ? (
           <motion.div
@@ -243,7 +233,7 @@ export default function CountdownTimer() {
             <img
               src="/static/logo.jpg"
               alt="Logo"
-              className="h-32 w-32 mb-4 animate-pulse"
+              className="h-24 w-24 sm:h-32 sm:w-32 mb-4 animate-pulse"
             />
           </motion.div>
         ) : isTimeOver ? (
@@ -257,7 +247,7 @@ export default function CountdownTimer() {
             <img
               src="/static/death-icon.png"
               alt="Death Icon"
-              className="h-64 w-64"
+              className="h-40 w-40 sm:h-64 sm:w-64"
             />
           </motion.div>
         ) : (
@@ -266,45 +256,45 @@ export default function CountdownTimer() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="text-[140px] leading-none flex flex-col items-center"
+            className="text-[60px] sm:text-[140px] leading-none flex flex-col items-center"
           >
             {/* @ts-ignore*/}
             <div className={`${getColorClass(timeLeft.years)} relative mb-4`}>
               {/* @ts-ignore*/}
               {timeLeft.years}
-              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+              <span className="text-[20px] sm:text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 YRS
               </span>
             </div>
-            {/* @ts-ignore*/}
+            {/* @ts-ignore */}
             <div className={`${getColorClass(timeLeft.days)} relative mb-4`}>
-              {/* @ts-ignore*/}
+              {/* @ts-ignore */}
               {timeLeft.days}
-              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+              <span className="text-[20px] sm:text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 DAYS
               </span>
             </div>
-            {/* @ts-ignore*/}
+            {/* @ts-ignore */}
             <div className={`${getColorClass(timeLeft.hours)} relative mb-4`}>
-              {/* @ts-ignore*/}
+              {/* @ts-ignore */}
               {timeLeft.hours}
-              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+              <span className="text-[20px] sm:text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 HRS
               </span>
             </div>
-            {/* @ts-ignore*/}
+            {/* @ts-ignore */}
             <div className={`${getColorClass(timeLeft.minutes)} relative mb-4`}>
-              {/* @ts-ignore*/}
+              {/* @ts-ignore */}
               {timeLeft.minutes}
-              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+              <span className="text-[20px] sm:text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 MIN
               </span>
             </div>
-            {/* @ts-ignore*/}
+            {/* @ts-ignore */}
             <div className={`${getColorClass(timeLeft.seconds)} relative`}>
-              {/* @ts-ignore*/}
+              {/* @ts-ignore */}
               {timeLeft.seconds}
-              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+              <span className="text-[20px] sm:text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 SEC
               </span>
             </div>
