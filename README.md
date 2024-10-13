@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Countdown-death-app.png" width="60%" alt="COUNTDOWN-DEATH-APP-logo">
+  <img src="./public/static/logo.jpg.png" width="60%" alt="COUNTDOWN-DEATH-APP-logo">
 </p>
 <p align="center">
     <h1 align="center">COUNTDOWN-DEATH-APP</h1>
