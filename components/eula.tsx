@@ -18,13 +18,11 @@ export default function Component({
   onAccept: () => void;
   onDeny: () => void;
 }) {
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - scrollTop <= clientHeight + 1) {
-      setIsScrolledToBottom(true);
     }
   };
 
