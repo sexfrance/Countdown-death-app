@@ -1,7 +1,8 @@
 import "./globals.css";
 import localFont from "next/font/local";
 import { Metadata } from "next";
-import Head from "next/head";
+
+import { Analytics } from "@vercel/analytics/react";
 
 const DINSchrift = localFont({ src: "./fonts/DINSchrift.otf" });
 export const metadata: Metadata = {
@@ -16,7 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${DINSchrift.className} `}>{children}</body>
+      <body className={`${DINSchrift.className} `}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

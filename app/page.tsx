@@ -146,9 +146,7 @@ export default function CountdownTimer() {
       // Start countdown
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => {
-          {
-            /* @ts-expect-error*/
-          }
+          {/* @ts-ignore*/ }
           let newTime = { ...prevTime };
 
           // Countdown logic
@@ -270,41 +268,41 @@ export default function CountdownTimer() {
             transition={{ duration: 0.5 }}
             className="text-[140px] leading-none flex flex-col items-center"
           >
-            {/* @ts-expect-error*/}
+            {/* @ts-ignore*/}
             <div className={`${getColorClass(timeLeft.years)} relative mb-4`}>
-              {/* @ts-expect-error*/}
+              {/* @ts-ignore*/}
               {timeLeft.years}
               <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 YRS
               </span>
             </div>
-            {/* @ts-expect-error*/}
+            {/* @ts-ignore*/}
             <div className={`${getColorClass(timeLeft.days)} relative mb-4`}>
-              {/* @ts-expect-error*/}
+              {/* @ts-ignore*/}
               {timeLeft.days}
               <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 DAYS
               </span>
             </div>
-            {/* @ts-expect-error*/}
+            {/* @ts-ignore*/}
             <div className={`${getColorClass(timeLeft.hours)} relative mb-4`}>
-              {/* @ts-expect-error*/}
+              {/* @ts-ignore*/}
               {timeLeft.hours}
               <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 HRS
               </span>
             </div>
-            {/* @ts-expect-error*/}
+            {/* @ts-ignore*/}
             <div className={`${getColorClass(timeLeft.minutes)} relative mb-4`}>
-              {/* @ts-expect-error*/}
+              {/* @ts-ignore*/}
               {timeLeft.minutes}
               <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 MIN
               </span>
             </div>
-            {/* @ts-expect-error*/}
+            {/* @ts-ignore*/}
             <div className={`${getColorClass(timeLeft.seconds)} relative`}>
-              {/* @ts-expect-error*/}
+              {/* @ts-ignore*/}
               {timeLeft.seconds}
               <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
                 SEC
