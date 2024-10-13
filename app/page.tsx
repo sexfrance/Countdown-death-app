@@ -1,101 +1,318 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Component from "@/components/eula";
+import { useRouter } from "next/navigation";
+
+const generateRandomTime = () => {
+  return {
+    years: Math.floor(Math.random() * 99) + 1,
+    days: Math.floor(Math.random() * 364) + 1,
+    hours: Math.floor(Math.random() * 23) + 1,
+    minutes: Math.floor(Math.random() * 59) + 1,
+    seconds: Math.floor(Math.random() * 59) + 1,
+  };
+};
+
+const getStoredTime = () => {
+  if (typeof window !== "undefined") {
+    const storedTime = localStorage.getItem("countdown_time");
+    return storedTime ? JSON.parse(storedTime) : null;
+  }
+  return null;
+};
+
+const setStoredTime = (time: any) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("countdown_time", JSON.stringify(time));
+  }
+};
+
+const calculateTimeWithElapsed = (storedTime: any, elapsedSeconds: any) => {
+  let newTime = { ...storedTime.time };
+
+  newTime.seconds -= elapsedSeconds % 60;
+  newTime.minutes -= Math.floor(elapsedSeconds / 60) % 60;
+  newTime.hours -= Math.floor(elapsedSeconds / 3600) % 24;
+  newTime.days -= Math.floor(elapsedSeconds / 86400) % 365;
+  newTime.years -= Math.floor(elapsedSeconds / 31536000);
+
+  // Adjust underflow values
+  if (newTime.seconds <= 0) {
+    newTime.seconds += 60;
+    newTime.minutes -= 1;
+  }
+  if (newTime.minutes < 0) {
+    newTime.minutes += 60;
+    newTime.hours -= 1;
+  }
+  if (newTime.hours < 0) {
+    newTime.hours += 24;
+    newTime.days -= 1;
+  }
+  if (newTime.days < 0) {
+    newTime.days += 365;
+    newTime.years -= 1;
+  }
+  if (newTime.years < 0) {
+    newTime.years = 0;
+    newTime.days = 0;
+    newTime.hours = 0;
+    newTime.minutes = 0;
+    newTime.seconds = 0;
+  }
+
+  return newTime;
+};
+
+const showLogoOncePerDay = () => {
+  if (typeof window !== "undefined") {
+    const lastLogoDate = localStorage.getItem("logoLastShown");
+    const today = new Date().toISOString().split("T")[0];
+
+    if (lastLogoDate === today) {
+      return false; // Don't show the logo
+    } else {
+      localStorage.setItem("logoLastShown", today);
+      return true; // Show the logo
+    }
+  }
+  return false;
+};
+
+export default function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isTimeOver, setIsTimeOver] = useState(false);
+  const [showToS, setShowToS] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const tosAccepted = localStorage.getItem("tosAccepted");
+      if (!tosAccepted) {
+        setShowToS(true);
+      } else {
+        const shouldShowLogo = showLogoOncePerDay();
+        setShowLogo(shouldShowLogo);
+        setIsLoading(true);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) {
+      // Play loading sound
+      const audio = new Audio("/static/scream.mp3");
+      audio.play();
+
+      // Loading animation lasts for 3 seconds
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!isLoading && !showToS) {
+      let storedTime = getStoredTime();
+      if (!storedTime) {
+        // If no stored time, generate new random time and save it
+        const newTime = generateRandomTime();
+        storedTime = {
+          time: newTime,
+          lastVisit: new Date().toISOString(),
+        };
+        setStoredTime(storedTime);
+      } else {
+        // Update time with elapsed seconds
+        const now = new Date().getTime();
+        const lastVisit = new Date(storedTime.lastVisit).getTime();
+        const elapsedSeconds = Math.floor((now - lastVisit) / 1000);
+
+        const newTime = calculateTimeWithElapsed(storedTime, elapsedSeconds);
+        storedTime = {
+          time: newTime,
+          lastVisit: new Date().toISOString(),
+        };
+        setStoredTime(storedTime);
+      }
+      setTimeLeft(storedTime.time);
+
+      // Start countdown
+      const timer = setInterval(() => {
+        setTimeLeft((prevTime) => {
+  {/* @ts-ignore*/} 
+          let newTime = { ...prevTime };
+
+          // Countdown logic
+          if (newTime.seconds > 1) {
+            newTime.seconds -= 1;
+          } else {
+            newTime.seconds = 60;
+            if (newTime.minutes > 1) {
+              newTime.minutes -= 1;
+            } else {
+              newTime.minutes = 60;
+              if (newTime.hours > 1) {
+                newTime.hours -= 1;
+              } else {
+                newTime.hours = 24;
+                if (newTime.days > 1) {
+                  newTime.days -= 1;
+                } else {
+                  newTime.days = 365;
+                  if (newTime.years > 0) {
+                    newTime.years -= 1;
+                  } else {
+                    clearInterval(timer);
+                    setTimeout(() => setIsTimeOver(true), 5000);
+                    return newTime;
+                  }
+                }
+              }
+            }
+          }
+
+          setStoredTime({
+            time: newTime,
+            lastVisit: new Date().toISOString(),
+          });
+
+          return newTime;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [isLoading, showToS]);
+
+  // Accept ToS
+  const acceptToS = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tosAccepted", "true");
+    }
+    const shouldShowLogo = showLogoOncePerDay();
+    setShowLogo(shouldShowLogo);
+    setShowToS(false);
+    setIsLoading(true);
+  };
+
+  // Deny ToS
+  const denyToS = () => {
+    router.back();
+  };
+
+  const getColorClass = (value: any) => {
+    return value === 0 ? "text-[#ba090f]" : "text-white";
+  };
+
+  if (!timeLeft && !isLoading && !showToS) {
+    // Show a loading indicator or nothing
+    return null;
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+      <AnimatePresence>
+        {showToS ? (
+          <motion.div
+            key="tos"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm p-6"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <Component onAccept={acceptToS} onDeny={denyToS} />
+          </motion.div>
+        ) : isLoading && showLogo ? (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="flex flex-col items-center absolute"
+            style={{ top: "50%", transform: "translateY(-50%)" }}
+          >
+            <img
+              src="/static/logo.jpg"
+              alt="Logo"
+              className="h-32 w-32 mb-4 animate-pulse"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </motion.div>
+        ) : isTimeOver ? (
+          <motion.div
+            key="death"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center"
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <img
+              src="/static/death-icon.png"
+              alt="Death Icon"
+              className="h-64 w-64"
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="countdown"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-[140px] leading-none flex flex-col items-center"
+          >
+         
+            {/* @ts-ignore*/}
+            <div className={`${getColorClass(timeLeft.years)} relative mb-4`}>
+              {/* @ts-ignore*/}
+              {timeLeft.years}
+              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+                YRS
+              </span>
+            </div>
+            {/* @ts-ignore*/}
+            <div className={`${getColorClass(timeLeft.days)} relative mb-4`}>
+              {/* @ts-ignore*/}
+              {timeLeft.days}
+              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+                DAYS
+              </span>
+            </div>
+            {/* @ts-ignore*/}
+            <div className={`${getColorClass(timeLeft.hours)} relative mb-4`}>
+              {/* @ts-ignore*/}
+              {timeLeft.hours}
+              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+                HRS
+              </span>
+            </div>
+            {/* @ts-ignore*/}
+            <div className={`${getColorClass(timeLeft.minutes)} relative mb-4`}>
+              {/* @ts-ignore*/}
+              {timeLeft.minutes}
+              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+                MIN
+              </span>
+            </div>
+            {/* @ts-ignore*/}
+            <div className={`${getColorClass(timeLeft.seconds)} relative`}>
+              {/* @ts-ignore*/}
+              {timeLeft.seconds}
+              <span className="text-[35px] absolute bottom-0 right-0 transform translate-x-full -translate-y-1/2">
+                SEC
+              </span>
+            </div>
+          
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
