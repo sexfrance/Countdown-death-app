@@ -68,7 +68,7 @@
 
 ## 📷 Preview
 
-[Preview](https://i.imgur.com/a1Q0DV9.png)
+![Preview](https://i.imgur.com/a1Q0DV9.png)
 
 ---
 
