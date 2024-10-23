@@ -66,9 +66,9 @@
 
 ---
 
-## 📂 Repository
+## 📷 Preview
 
-For more details and to contribute to the project, visit the [Github repository](https://github.com/sexfrance/Countdown-death-app).
+https://i.imgur.com/a1Q0DV9.png
 
 ---
 
