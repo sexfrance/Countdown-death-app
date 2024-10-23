@@ -5,13 +5,15 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    "target": "ES6",
     "esModuleInterop": true,
-    "module": "esnext",
+    "module": "ESnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+
     "plugins": [
       {
         "name": "next"
